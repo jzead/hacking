@@ -1,45 +1,34 @@
-const express = require('express');
-const app = express();
+#!/usr/bin/env python3
+import subprocess
 
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/main', { useNewUrlParser: true, useUnifiedTopology: true });
-const db = mongoose.connection;
+    from flask import Flask, request, render_template, redirect
 
-// flag is in db, {'uid': 'admin', 'upw': 'DH{32alphanumeric}'}
-const BAN = ['admin', 'dh', 'admi'];
+from flag import FLAG
 
-filter = function (data) {
-    const dump = JSON.stringify(data).toLowerCase();
-    var flag = false;
-    BAN.forEach(function (word) {
-        if (dump.indexOf(word) != -1) flag = true;
-    });
-    return flag;
-}
+APP = Flask(__name__)
 
-app.get('/login', function (req, res) {
-    if (filter(req.query)) {
-        res.send('filter');
-        return;
-    }
-    const { uid, upw } = req.query;
 
-    db.collection('user').findOne({
-        'uid': uid,
-        'upw': upw,
-    }, function (err, result) {
-        if (err) {
-            res.send('err');
-        } else if (result) {
-            res.send(result['uid']);
-        } else {
-            res.send('undefined');
-        }
-    })
-});
+@APP.route('/')
+def index():
+return render_template('index.html')
 
-app.get('/', function (req, res) {
-    res.send('/login?uid=guest&upw=guest');
-});
 
-app.listen(8000, '0.0.0.0');
+@APP.route('/ping', methods = ['GET', 'POST'])
+def ping():
+if request.method == 'POST':
+    host = request.form.get('host')
+cmd = f'ping -c 3 "{host}"'
+try:
+output = subprocess.check_output(['/bin/sh', '-c', cmd], timeout = 5)
+return render_template('ping_result.html', data = output.decode('utf-8'))
+        except subprocess.TimeoutExpired:
+return render_template('ping_result.html', data = 'Timeout !')
+        except subprocess.CalledProcessError:
+return render_template('ping_result.html', data = f'an error occurred while executing the command. -> {cmd}')
+
+return render_template('ping.html')
+
+
+if __name__ == '__main__':
+    APP.run(host = '0.0.0.0', port = 8000)
+
