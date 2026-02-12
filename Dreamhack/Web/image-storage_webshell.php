@@ -1,4 +1,4 @@
 <?php
-    system("cat /flag.txt");
+    echo "hello, world";
 ?>
 
