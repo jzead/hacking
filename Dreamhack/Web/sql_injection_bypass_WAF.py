@@ -7,4 +7,3 @@ res = requests.get(payload)
 flag += res.text.split("D")[-1].split("}")[0]
 flag += "}"
 print(flag)
-%27concat("unio",substr("n",1,1))(concat("selec",substr("t",1,1))(NULL,"hello",NULL))
